@@ -47,5 +47,43 @@ fn validate_npuzzles (npuzzles_str : &str) -> Result<usize, ValidationError> {
     }
 }
 
-fn parse_input(args: &Vec<String>) -> RunningOpts {
+fn parse_argument(arg: &str, validate: fn(&str) -> Result<usize, ValidationError>) -> usize {
+    match validate(arg) {
+        Ok(value) => value,
+        Err(e) => {
+            eprint!("Error: {}", e);
+            std::process::exit(1);
+        }
+    }
 }
+
+fn parse_input(args: &Vec<String>) -> RunningOpts {
+    let mut num_rows = None;
+    let mut num_cols = None;
+    let mut num_puzzles = None;
+
+    let mut i = 1;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--rows" => {
+                i += 1;
+                num_rows = Some(parse_argument(&args[i], validate_dsize));
+            },
+            "--cols" => {
+                i += 1;
+                num_cols = Some(parse_argument(&args[i], validate_dsize));
+            },
+            _ => {
+                num_puzzles = Some(parse_argument(&args[i], validate_npuzzles));
+            }
+        }
+        i += 1;
+    }
+    
+    RunningOpts {
+        num_rows: num_rows.unwrap(),
+        num_cols: num_cols.unwrap(),
+        num_puzzles: num_puzzles.unwrap()
+    }
+}
+
