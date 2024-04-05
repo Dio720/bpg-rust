@@ -1,6 +1,5 @@
 mod bpg;
-mod commom;
-mod validation;
+mod cli;
 
 use std::env;
 
