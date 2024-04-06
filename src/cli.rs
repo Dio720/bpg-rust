@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{value_parser, Arg, Command};
 
 struct RunOpts {
     rows: u32,
@@ -6,35 +6,43 @@ struct RunOpts {
     num_puzzles: u32,
 }
 
-static HELP_MESSAGE: &str = r#"    
-    Usage: [<options>] <number_of_puzzles>
-        Program options are:
-            --rows <num>	Specify the number of rows for the matrix,
-                                with `<num>` in the range [7, 16 ].
-                                The default value is 10.
-            --cols <num>	Specify the number of columns for the matrix,
-                                with `<num>` in the range [7,16].
-                                The default value is 10.
-        Requested input is:
-            number_of_puzzles	The number of puzzles to be generated,
-                                in the range [1,100]."#;
-
-pub fn parse_arguments() -> RunOpts {
-    let arguments = App::new("bpg")
-        .author("Vinicius Lima")
-        .about("Generate from [0,100] battleship game puzzles with n×n dimensions")
-        .arg(Arg::with_name("rows")
-            .long("rows")
-            .short('r')
-            .takes_value(true)
-            .help("Specify ther number of rows for the matrix")
-            .value_parser(validate_dimension))
-        .arg(Arg::with_name("cols")
-            .long("cols")
-            .short('c')
-            .takes_value(true)
-            .help("Specify the number of columns for the matrix")
-            .value_parser(validate_dimension))
+pub fn parse_arguments() {
+    let _args = Command::new("bpg")
+        .arg(
+            Arg::new("rows")
+                .long("rows")
+                .short('r')
+                .help("Specify ther number of rows for the matrix")
+                .value_parser(value_parser!(i32).range(7..=16))
+                .default_value("10"), // < Default num_rows
+        )
+        .arg(
+            Arg::new("cols")
+                .long("cols")
+                .short('c')
+                .help("Specify the number of columns for the matrix")
+                .value_parser(value_parser!(i32).range(7..=16))
+                .default_value("10"), // < Default num_rows
+        )
+        .arg(
+            Arg::new("num_puzzles")
+                .required(true) // returns error when don't used
+                .help("The number of puzzles to be generated")
+                .value_parser(value_parser!(i32).range(7..=16)), // Converts the argument to 32-bit
+            // int
+        )
+        .try_get_matches()
+        .unwrap_or_else(|err| {
+            eprintln!("{}", err);
+            std::process::exit(1);
+        });
     
-}
+    let arg_ids = ["rows", "cols", "num_puzzles"];
 
+    for arg in arg_ids {
+        match _args.get_one::<i32>(arg) {
+            Some(value) => println!("{}: {}", arg, value),
+            _ => println!("{}: Doesn't exists or error", arg)
+        }
+    }
+}
