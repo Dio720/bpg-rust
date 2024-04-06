@@ -3,7 +3,7 @@
 The program consists in creating a set of distinct Battleship puzzles and write them to an output file.
 The quantity of puzzles and their dimensions should be specified by the user through **command line arguments**.
 
-_This is an open-source adaptation to Rust from the [original project](github.com/Dio720/Battleship-Puzzle-Game-Generator-docs) made by me and @gabrieloak123 in c++_
+_This is an open-source adaptation to Rust from the [original project](https://github.com/Dio720/Battleship-Puzzle-Game-Generator-docs) made by me and @gabrieloak123 in c++_
 
 ## 2. The Battleship Puzzle
 
