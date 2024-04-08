@@ -1,7 +1,5 @@
 use clap::{value_parser, Arg, Command};
-
-// u16 stands for unsigned int 16-bit
-type Nat = u16;
+use crate::Nat;
 
 pub struct Config {
     pub rows: Nat,
@@ -42,7 +40,7 @@ pub fn parse_arguments() -> Config {
                 .required(true) // returns error when don't used
                 .help("The number of puzzles to be generated")
                 .value_parser(value_parser!(Nat).range(0..=100)), // Converts the argument to 32-bit
-                                                                 // int
+                                                                  // int
         )
         .try_get_matches()
         .unwrap_or_else(|err| {
@@ -57,10 +55,10 @@ pub fn parse_arguments() -> Config {
     for arg in arg_ids {
         match _args.get_one::<Nat>(arg) {
             Some(value) => match arg {
-                "rows"        => run_opts.rows = *value,
-                "cols"        => run_opts.cols = *value,
+                "rows" => run_opts.rows = *value,
+                "cols" => run_opts.cols = *value,
                 "num_puzzles" => run_opts.num_puzzles = *value,
-                _             => unreachable!(),
+                _ => unreachable!(),
             },
             None => {
                 eprintln!("Error: Argument {} not found", arg);

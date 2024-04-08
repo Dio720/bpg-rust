@@ -3,6 +3,8 @@ use cli::parse_arguments;
 mod bpg;
 mod cli;
 
+pub type Nat = u16;
+
 fn main() {
     let run_opts = parse_arguments();
 
