@@ -1,4 +1,5 @@
 use crate::Nat;
+use std::ops::Add;
 
 type CoordType = Nat;
 
@@ -7,10 +8,10 @@ pub struct Cell {
     row: CoordType,
     col: CoordType,
 }
-impl Cell {
-    /// overload of (+) operator
-    pub fn add(&self, rhs: &Cell) -> Self {
-        Self {
+impl Add for Cell {
+    type Output = Cell;
+    fn add(self, rhs: Cell) -> Cell {
+        Cell {
             row: self.row + rhs.row,
             col: self.col + rhs.col,
         }
@@ -92,4 +93,6 @@ impl Board {
         });
         overlap
     }
+
+    fn is_within_board_limits(&self, cell: &Cell) -> bool {}
 }
