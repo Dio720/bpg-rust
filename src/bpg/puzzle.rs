@@ -58,30 +58,38 @@ impl Board {
         (0..self.rows).contains(&cell.row) && (0..self.cols).contains(&cell.col)
     }
 
-    fn iterate_ship_cells<F: Fn(Cell) -> ()>(&self, ship: &Ship, f: F) {
+    fn iterate_ship_cells<F: FnMut(Cell) -> Option<()>>(&self, ship: &Ship, mut f: F) {
         for index in 0..ship.len {
             let cell = match ship.pos.orient {
                 Orientation::H => Cell {
                     row: ship.pos.coord.row,
                     col: ship.pos.coord.col + index,
                 },
-                    _ => Cell {
+                _ => Cell {
                     row: ship.pos.coord.row + index,
                     col: ship.pos.coord.col,
                 },
             };
-            f(cell);
+            match f(cell) {
+                Some(_) => continue,
+                _ => break,
+            }
         }
     }
 
     /*TODO: docs  */
     /// Is used to verify if a ship can be added in the add_ship method
     fn is_overlapping(&self, ship: &Ship) -> bool {
-        // match ship.position.orientation {
-        //     Orientation::H => {
-        //
-        //     }
-        // }
-        true
+        let mut overlap = false;
+        self.iterate_ship_cells(ship, |cell| {
+            match self.board[cell.row as usize][cell.col as usize] {
+                CellState::Water => Some(()),
+                _ => {
+                    overlap = true;
+                    None
+                }
+            }
+        });
+        overlap
     }
 }
