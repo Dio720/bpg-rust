@@ -8,11 +8,6 @@ pub struct Cell {
     row: CoordType,
     col: CoordType,
 }
-impl Cell {
-    fn new(row: CoordType, col: CoordType) -> Cell {
-        Cell { row, col }
-    }
-}
 impl Add for Cell {
     type Output = Cell;
     fn add(self, rhs: Cell) -> Cell {
@@ -22,12 +17,13 @@ impl Add for Cell {
         }
     }
 }
+#[derive(PartialEq)]
 enum CellState {
     Water,
     Ship,
     Margin,
 }
-enum Orientation {
+pub enum Orientation {
     H, // Horizontal
     V, // Vertical
     U, // Undefined
@@ -56,25 +52,24 @@ impl Direction {
             Direction::SouthEast => (cell.row.checked_sub(1).unwrap_or(0), cell.col + 1),
             Direction::East => (cell.row, cell.col + 1),
             Direction::West => (cell.row, cell.col.checked_sub(1).unwrap_or(0)),
-        };
-        Cell {
+        }; Cell {
             row: coord.0,
             col: coord.1,
         }
     }
 }
-enum ShipType {
+pub enum ShipType {
     Battleship,
     Destroyer,
     Cruiser,
     Submarine,
 }
-struct Position {
+pub struct Position {
     coord: Cell,
     orient: Orientation,
 }
 pub struct Ship {
-    ship_t: ShipType,
+    pub _type: ShipType,
     pos: Position,
     len: Nat,
 }
@@ -146,7 +141,8 @@ impl Board {
         for dir in directions {
             let adj_cell = dir.offset(&cell);
 
-            if self.is_within_board_limits(&adj_cell) {
+            if self.board[adj_cell.row as usize][adj_cell.col as usize] == CellState::Water {
+                self.board[adj_cell.row as usize][adj_cell.col as usize] = CellState::Margin;
             }
         }
     }
@@ -163,7 +159,7 @@ impl Board {
 
             for cell in updates {
                 self.board[cell.row as usize][cell.col as usize] = CellState::Ship;
-                // TODO: Fill margins
+                self.fill_margins(cell);
             }
             true
         }
