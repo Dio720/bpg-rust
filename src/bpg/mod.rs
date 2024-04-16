@@ -1,5 +1,5 @@
 mod puzzle;
-// mod generator;
+mod generator;
 //
 // pub use self::puzzle::Puzzle;
 // pub use self::generator::Generator;
