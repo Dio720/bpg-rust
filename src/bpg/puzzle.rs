@@ -8,6 +8,11 @@ pub struct Cell {
     row: CoordType,
     col: CoordType,
 }
+impl Cell {
+    fn new(row: CoordType, col: CoordType) -> Cell {
+        Cell { row, col }
+    }
+}
 impl Add for Cell {
     type Output = Cell;
     fn add(self, rhs: Cell) -> Cell {
@@ -22,11 +27,41 @@ enum CellState {
     Ship,
     Margin,
 }
-
 enum Orientation {
     H, // Horizontal
     V, // Vertical
     U, // Undefined
+}
+enum Direction {
+    North,
+    NorthWest,
+    NorthEast,
+    South,
+    SouthWest,
+    SouthEast,
+    East,
+    West,
+}
+impl Direction {
+    fn offset(&self, cell: &Cell) -> Cell {
+        let coord = match self {
+            Direction::North => (cell.row + 1, cell.col),
+            Direction::NorthWest => (cell.row + 1, cell.col.checked_sub(1).unwrap_or(0)),
+            Direction::NorthEast => (cell.row + 1, cell.col + 1),
+            Direction::South => (cell.row.checked_sub(1).unwrap_or(0), cell.col),
+            Direction::SouthWest => (
+                cell.row.checked_sub(1).unwrap_or(0),
+                cell.col.checked_sub(1).unwrap_or(0),
+            ),
+            Direction::SouthEast => (cell.row.checked_sub(1).unwrap_or(0), cell.col + 1),
+            Direction::East => (cell.row, cell.col + 1),
+            Direction::West => (cell.row, cell.col.checked_sub(1).unwrap_or(0)),
+        };
+        Cell {
+            row: coord.0,
+            col: coord.1,
+        }
+    }
 }
 enum ShipType {
     Battleship,
@@ -50,11 +85,10 @@ type BoardType = Vec<Vec<CellState>>;
 pub struct Board {
     rows: CoordType,
     cols: CoordType,
-    pub board: BoardType,
+    board: BoardType,
 }
 
 impl Board {
-    /*TODO: docs*/
     fn is_within_limits(&self, cell: &Cell) -> bool {
         (0..self.rows).contains(&cell.row) && (0..self.cols).contains(&cell.col)
     }
@@ -72,13 +106,12 @@ impl Board {
                 },
             };
             match f(cell) {
-                Some(_) => continue,
+                None => continue,
                 _ => break,
             }
         }
     }
 
-    /*TODO: docs  */
     /// Is used to verify if a ship can be added in the add_ship method
     fn is_overlapping(&self, ship: &Ship) -> bool {
         let mut overlap = false;
@@ -87,12 +120,52 @@ impl Board {
                 CellState::Water => Some(()),
                 _ => {
                     overlap = true;
-                    None
+                    Some(())
                 }
             }
         });
         overlap
     }
 
-    fn is_within_board_limits(&self, cell: &Cell) -> bool {}
+    fn is_within_board_limits(&self, cell: &Cell) -> bool {
+        !(cell.row > self.rows && cell.col > self.cols)
+    }
+
+    fn fill_margins(&mut self, cell: Cell) {
+        let directions = [
+            Direction::North,
+            Direction::NorthWest,
+            Direction::NorthEast,
+            Direction::South,
+            Direction::SouthWest,
+            Direction::SouthEast,
+            Direction::West,
+            Direction::East,
+        ];
+
+        for dir in directions {
+            let adj_cell = dir.offset(&cell);
+
+            if self.is_within_board_limits(&adj_cell) {
+            }
+        }
+    }
+
+    pub fn add_ship(&mut self, ship: Ship) -> bool {
+        if self.is_overlapping(&ship) {
+            false
+        } else {
+            let mut updates = Vec::new();
+            self.iterate_ship_cells(&ship, |cell| {
+                updates.push(cell);
+                None
+            });
+
+            for cell in updates {
+                self.board[cell.row as usize][cell.col as usize] = CellState::Ship;
+                // TODO: Fill margins
+            }
+            true
+        }
+    }
 }
